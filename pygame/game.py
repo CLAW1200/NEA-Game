@@ -20,3 +20,5 @@ class gameWindow():
         quit()
     
     
+gameWindow = gameWindow()
+gameWindow.gameLoop()
