@@ -42,6 +42,10 @@ def main(c,m,g,Vx0,Vy0,theta,t0,tmax,steps,outputName):
     
     #plt.plot(yM[:,0],yM[:,2],'.',label='Numerical solution') #Plots y over x numerically.
 
+    numericalX = yM[:,0]
+    numericalY = yM[:,2]
+
+
     #Analytical Solution:
     VT=m*g/c #Calculates the terminal velocity
     plot_x=((V0*VT)/g)*np.cos(theta)*(1-np.exp(-g*tLF/VT)) #calculates dx/dt using the analytical solution
@@ -68,7 +72,8 @@ def main(c,m,g,Vx0,Vy0,theta,t0,tmax,steps,outputName):
     f.close()
 
 
-    return plot_x, plot_y, D, H, TF, Vi, yM, steps
+    #return plot_x, plot_y, D, H, TF, Vi, yM, steps
+    return numericalX, numericalY, plot_x, plot_y, D, H, TF, Vi, yM, steps
 
 if __name__ == "__main__":
     pass
