@@ -1,7 +1,7 @@
 import pygame
 import solve
 
-WIDTH = 1500
+WIDTH = 800
 HEIGHT = 600
 
 #c,m,g,Vx0,Vy0,theta,t0,tmax,steps,outputName
