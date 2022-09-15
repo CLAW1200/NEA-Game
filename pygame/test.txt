@@ -1,0 +1,9 @@
+ The distance to the point of impact is 1.7324971508004254 m.
+
+The highest point of the trajectory is at 0.2123227652352341 meters above ground.
+
+The time for flight is 0.4166666666666667 s.
+
+The impact velocity is 2.959059969577248 m/s.
+
+The terminal velocity is 4.0875 m/s.

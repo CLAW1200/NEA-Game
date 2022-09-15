@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"name": "NEA-ProjectileMotion",
+			"path": "../../NEA-ProjectileMotion"
+		}
+	],
+	"settings": {}
+}
