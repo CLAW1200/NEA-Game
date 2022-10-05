@@ -1,35 +1,22 @@
 import pygame
-from pygame.locals import *
 import math
 
 class Game:
     def __init__(self, width, height):
         pygame.init()
-        self.width = width
-        self.height = height
-        self.screen = pygame.display.set_mode((self.width, self.height))
+        self.screen = pygame.display.set_mode((width, height))
         self.clock = pygame.time.Clock()
         self.fps = 120
+        self.mouse1down = False
         self.running = True
-        self.cannon = Cannon()
-        self.move = False
-        self.start()
 
-    def returnMoveState(self):
-        return game.move
-
-    def setMoveState(self, move):
-            Game.move = move
-
-    def start(self):
+    def run(self):
         while self.running:
-            self.run()
+            self.clock.tick(self.fps)
+            self.events()
+            self.update()
+            self.draw()
 
-    def draw(self):
-        self.screen.fill((0, 0, 0))
-        self.cannon.draw(self.screen)
-        pygame.display.flip()
-    
     def events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -37,21 +24,25 @@ class Game:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
+                if event.key == pygame.K_SPACE:
+                    cannon.fire()
+            
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    self.move = True
+                    self.mouse1down = True
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
-                    self.move = False
-
+                    self.mouse1down = False
+    
     def update(self):
-        self.cannon.update()
+        cannon.update()
 
-    def run(self):
-        self.clock.tick(self.fps)
-        self.events()
-        self.draw()
-        self.update()
+    def draw(self):
+        self.screen.fill((0, 0, 0))
+        cannon.draw(self.screen)
+        pygame.display.update()
+
+
 
 class Cannon(pygame.sprite.Sprite):
     def __init__(self):
@@ -71,17 +62,12 @@ class Cannon(pygame.sprite.Sprite):
         rot_rect.center = rot_image.get_rect().center
         rot_image = rot_image.subsurface(rot_rect).copy()
         return rot_image
-    
+
+
     def pointToMouse(self):
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-        if Game.returnMoveState(self):
+        if game.mouse1down:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
             self.rect.center = (mouse_x, mouse_y)
-            Game.setMoveState(self, False)
-        #aim towards mouse
-        else:
-            rel_x, rel_y = mouse_x - self.rect.x, mouse_y - self.rect.y
-            self.angle = (180 / math.pi) * -math.atan2(rel_y, rel_x)
-            self.cannonMovImg = self.rot_center(self.image, self.angle)
    
   
     def draw(self, screen):
@@ -91,21 +77,32 @@ class Cannon(pygame.sprite.Sprite):
         self.pointToMouse()
 
 
-class Ball(pygame.sprite.Sprite):
-    def __init__(self):
+class Projectile(pygame.sprite.Sprite):
+    def __init__(self, x, y):
         self.image = pygame.image.load("images\\cannonBall.png")
         self.rect = self.image.get_rect()
-        self.rect.x = 100
-        self.rect.y = 280
+        self.rect.x = x
+        self.rect.y = y
+        self.angle = cannon.angle
+        self.speed = 5
+        self.x_speed = self.speed * math.cos(math.radians(self.angle))
+        self.y_speed = self.speed * math.sin(math.radians(self.angle))
+        self.gravity = 0.5
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
-    
+
     def update(self):
-        pass
+        self.rect.x += self.x_speed
+        self.rect.y -= self.y_speed
+        self.y_speed -= self.gravity
+
+        if self.rect.y > 600:
+            self.kill()
+
 
 
 if __name__ == "__main__":
-    game = Game(800, 600)
-    game.start()
-    pygame.quit()
+    game = Game(600, 600)   
+    cannon = Cannon()
+    game.run()
