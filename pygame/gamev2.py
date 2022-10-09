@@ -1,5 +1,6 @@
 import pygame
 import math
+import solve2
 
 class Game:
     def __init__(self, width, height):
@@ -8,6 +9,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.fps = 120
         self.mouse1down = False
+        self.spacedown = False
         self.running = True
 
     def run(self):
@@ -25,14 +27,27 @@ class Game:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
                 if event.key == pygame.K_SPACE:
-                    cannon.fire()
+                    self.spacedown = True
+
             
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     self.mouse1down = True
+
+                if event.button == 4:
+                    cannon.angle += 3
+                    cannon.cannonMovImg = cannon.rot_center()
+
+                if event.button == 5:   
+                    cannon.angle -= 3
+                    cannon.cannonMovImg = cannon.rot_center()
+                
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
                     self.mouse1down = False
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_SPACE:
+                    self.spacedown = False
     
     def update(self):
         cannon.update()
@@ -42,8 +57,6 @@ class Game:
         cannon.draw(self.screen)
         pygame.display.update()
 
-
-
 class Cannon(pygame.sprite.Sprite):
     def __init__(self):
         self.image = pygame.image.load("images\\cannonTube.png")
@@ -51,11 +64,15 @@ class Cannon(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = 100
         self.rect.y = 280
-        self.angle = 45
-        self.cannonMovImg = self.rot_center(self.image, self.angle)
+        self.angle = 90
+        self.cannonMovImg = self.rot_center()
+        self.fireCannon = False
+        
 
-    def rot_center(self, image, angle):
+    def rot_center(self):
         """rotate an image while keeping its center and size"""
+        image = self.image
+        angle = self.angle
         orig_rect = image.get_rect()
         rot_image = pygame.transform.rotate(image, angle)
         rot_rect = orig_rect.copy()
@@ -68,39 +85,63 @@ class Cannon(pygame.sprite.Sprite):
         if game.mouse1down:
             mouse_x, mouse_y = pygame.mouse.get_pos()
             self.rect.center = (mouse_x, mouse_y)
-   
-  
+
+    def fire(self):
+        if game.spacedown:
+            self.fireCannon = True
+            self.ball = Projectile(self.rect.center[0], self.rect.center[1], self.angle)
+
     def draw(self, screen):
         screen.blit(self.cannonMovImg, self.rect)
-    
+        if self.fireCannon:
+            self.ball.draw(screen)
+
+
     def update(self):
+        self.fire()
         self.pointToMouse()
+        if self.fireCannon:
+            self.ball.update()
 
 
 class Projectile(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, angle):
         self.image = pygame.image.load("images\\cannonBall.png")
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.angle = cannon.angle
-        self.speed = 5
+        self.angle = angle
+        self.speed = 50
         self.x_speed = self.speed * math.cos(math.radians(self.angle))
         self.y_speed = self.speed * math.sin(math.radians(self.angle))
-        self.gravity = 0.5
+        self.gravity = 9.81
+
+        self.calcX = 0
+        self.calcY = 0
+        self.calcVx = self.x_speed
+        self.calcVy = self.y_speed
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 
     def update(self):
-        self.rect.x += self.x_speed
-        self.rect.y -= self.y_speed
-        self.y_speed -= self.gravity
+        data = solve2.solveForNextPosition(self.rect.x, self.rect.y, self.x_speed, self.y_speed, 1, self.gravity, 0.1, 1)
+        self.calcX = data[0]
+        self.calcY = data[1]
+        self.calcVx = data[2]
+        self.calcVy = data[3]
+
+        #transform the calculation coords to screen coords
+        self.rect.x = self.calcX
+        self.rect.y = self.calcY
+
+
 
         if self.rect.y > 600:
             self.kill()
 
-
+    def kill(self):
+        del self
 
 if __name__ == "__main__":
     game = Game(600, 600)   

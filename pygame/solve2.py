@@ -1,9 +1,15 @@
 """calculate the motion of a projectile with air resistance based on the initial velocity, angle, mass, and drag coefficient"""
-import numpy as np
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 
-
+x= 0
+y= 0
+vx= 50
+vy= 50
+dt= 0.1
+g= 9.81
+c= 2
+m= 1
 
 def solveForNextPosition(x, y, vx, vy, dt, g, c, m):
     """solve for the next position of the projectile"""
@@ -17,7 +23,7 @@ def solveForNextPosition(x, y, vx, vy, dt, g, c, m):
     return y[1,0], y[1,2], y[1,1], y[1,3]
 
 
-"""
+
 xPlot = []
 yPlot = []
 
@@ -46,4 +52,3 @@ plt.show()
 
 
 
-"""
